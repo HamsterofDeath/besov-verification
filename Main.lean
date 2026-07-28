@@ -1,0 +1,16 @@
+import BesovVerification
+
+#print BesovVerification.exists_exactCube_besovEnergy_equivalence_constants
+#print axioms BesovVerification.exists_exactCube_besovEnergy_equivalence_constants
+
+#print BesovVerification.exactCube_besovEnergy_equivalence_of_cornerScale
+#print axioms BesovVerification.exactCube_besovEnergy_equivalence_of_cornerScale
+
+#print BesovVerification.averagedEnergy_truncated_comparison
+#print axioms BesovVerification.averagedEnergy_truncated_comparison
+
+#print BesovVerification.averagedEnergy_le_besovEnergy
+#print axioms BesovVerification.averagedEnergy_le_besovEnergy
+
+#print BesovVerification.exists_finite_upper_comparison_constant
+#print axioms BesovVerification.exists_finite_upper_comparison_constant

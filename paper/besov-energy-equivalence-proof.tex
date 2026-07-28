@@ -1,0 +1,1387 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=30mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\allowdisplaybreaks
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.65em}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Rbarp}{\overline{\mathbb R}_{+}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\Aenergy}{\mathcal A}
+\newcommand{\Senergy}{\mathcal S}
+\newcommand{\Tenergy}{\mathcal T}
+\newcommand{\Benergy}{\mathcal B}
+\newcommand{\Venergy}{\mathcal V}
+\newcommand{\Cube}{Q_d}
+\newcommand{\Corners}{\mathcal C_d}
+
+\title{Exact-Diameter Equivalence of Averaged and Singular Besov Energies
+for Ahlfors-Regular Measures on the Cube}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Let a Borel measure be Ahlfors regular through the scale
+\(R=\sqrt d\), and suppose that its support lies in the Euclidean unit
+cube \([0,1]^d\).  We prove, with explicit positive finite structural
+constants, the equivalence between an averaged, ball-normalized quadratic
+energy and the corresponding singular Besov energy.  All energies take
+values in the extended nonnegative reals, so the result requires no
+finiteness assumption on the energies.  The exact cutoff \(R=\sqrt d\)
+requires care because the balls are open: an open ball of radius equal to
+the cube diameter need not contain the opposite corner.  We resolve this
+endpoint by a quantitative corner-avoidance construction.  It produces a
+positive-measure anchor set at a radius strictly below \(R\), which in turn
+controls the long-range part of the singular energy.  The proof records the
+exact constants and the order in which they are selected.  It is the
+human-readable counterpart of a Lean 4 and Mathlib formalization.
+\end{abstract}
+
+\tableofcontents
+
+\section{Setting and conventions}
+
+Let
+\[
+  d\in\mathbb N,\qquad d>0,\qquad
+  X=\mathbb R^d,\qquad
+  \Cube=[0,1]^d,\qquad
+  R=\sqrt d.
+\]
+The space \(X\) carries its Euclidean metric and Borel sigma-algebra.
+Every ball \(B(x,r)\) in this article is an \emph{open} metric ball.
+
+Let \(\nu\) be a Borel measure on \(X\), let
+\[
+  E=\supp\nu,
+\]
+and suppose
+\[
+  E\subseteq\Cube.
+\]
+Fix real parameters
+\[
+  \alpha>0,\qquad s>0,\qquad s<\frac{\alpha}{2},
+  \qquad 0<c_A\leq C_A,
+\]
+and put
+\[
+  p=\alpha+2s.
+\]
+In particular, \(R>0\), \(C_A>0\), and \(p>0\).
+
+The Ahlfors hypotheses are
+\begin{equation*}
+  c_A r^\alpha
+  \leq \nu(B(x,r))
+  \leq C_A r^\alpha
+  \qquad
+  (x\in E,\ 0<r\leq R).
+  \tag{AR}
+\end{equation*}
+
+All nonnegative integrals are interpreted as extended nonnegative Lebesgue
+integrals and take values in
+\[
+  \Rbarp=[0,\infty].
+\]
+We write
+\[
+  \iota:[0,\infty)\longrightarrow\Rbarp
+\]
+for the canonical embedding.  The extended inverse and product conventions
+are
+\[
+  0^{-1}=\infty,\qquad
+  \infty^{-1}=0,\qquad
+  0\cdot\infty=\infty\cdot0=0.
+\]
+After the exact formal constants have been displayed, positive finite real
+numbers will be identified with their images under \(\iota\).
+
+Let \(u:X\to\mathbb R\) be Borel measurable and define
+\[
+  \Delta_u(x,y)=(u(x)-u(y))^2.
+\]
+For \(r\in\mathbb R\), set
+\begin{align}
+  D_r(x)
+  &=
+  \int_{B(x,r)}\Delta_u(x,y)\,\dd\nu(y),                                      \label{eq:ball-energy}\\
+  L_r
+  &=
+  \int_XD_r(x)\,\dd\nu(x),                                                     \label{eq:local-energy}\\
+  N_r
+  &=
+  \int_X\nu(B(x,r))^{-1}D_r(x)\,\dd\nu(x).                                    \label{eq:normalized-local-energy}
+\end{align}
+The averaged energy is
+\begin{equation}
+  \Aenergy_{s,R}(u)
+  =
+  \int_{(0,R]}r^{-1-2s}N_r\,\dd r,                                             \label{eq:averaged-energy}
+\end{equation}
+and the unnormalized scale energy is
+\begin{equation}
+  \Senergy_{\alpha,s,R}(u)
+  =
+  \int_{(0,R]}r^{-1-\alpha-2s}L_r\,\dd r
+  =
+  \int_{(0,R]}r^{-1-p}L_r\,\dd r.                                              \label{eq:scale-energy}
+\end{equation}
+
+The singular integrand is defined explicitly on the diagonal:
+\[
+  \Phi_{p,u}(x,y)
+  =
+  \begin{cases}
+    0,&x=y,\\
+    \Delta_u(x,y)\lvert x-y\rvert^{-p},&x\neq y.
+  \end{cases}
+\]
+The singular Besov energy and global quadratic variation are
+\begin{align}
+  \Benergy_{\alpha,s}(u)
+  &=
+  \int_X\int_X\Phi_{p,u}(x,y)\,\dd\nu(y)\,\dd\nu(x),                            \label{eq:besov-energy}\\
+  \Venergy(u)
+  &=
+  \int_X\int_X\Delta_u(x,y)\,\dd\nu(y)\,\dd\nu(x).                             \label{eq:global-variation}
+\end{align}
+The diagonal convention in \eqref{eq:besov-energy} is part of the
+definition; the singular energy is not defined by silently evaluating a
+product \(0\cdot\infty\).
+
+\begin{remark}[The function space represented by the formal theorem]
+The formal theorem quantifies over globally Borel measurable functions
+\(u:X\to\mathbb R\).  It therefore applies, in particular, to any globally
+measurable representative of an \(L^2(E,\nu)\) function.  It is not a
+theorem stated on an \(L^2\) quotient type, and it does not formalize the
+selection or extension of a representative defined only on \(E\).
+\end{remark}
+
+\section{Exact structural constants and the main theorem}
+
+Let
+\[
+  \Corners=\{0,1\}^d
+\]
+be the set of cube corners.  Since \(\alpha>0\), one can choose, once and
+for all and before choosing \(\nu\) or \(u\), a number \(\delta>0\) such
+that
+\begin{equation}
+  2\delta\leq R                                                        \label{eq:delta-radius}
+\end{equation}
+and
+\begin{equation}
+  \sum_{v\in\Corners} C_A(2\delta)^\alpha
+  <
+  c_A R^\alpha.                                                        \label{eq:delta-small}
+\end{equation}
+Equivalently, the left side is \(2^d C_A(2\delta)^\alpha\).
+
+Define the real geometric quantities
+\begin{align}
+  \rho_\delta
+  &=
+  \sqrt{d-\delta^2},                                                    \label{eq:rho}\\
+  \varepsilon_\delta
+  &=
+  \frac{R-\rho_\delta}{2},                                              \label{eq:epsilon}\\
+  \lambda_\delta
+  &=
+  \frac{R+\rho_\delta}{2R},                                             \label{eq:lambda}\\
+  r_\delta
+  &=
+  \lambda_\delta R
+  =
+  \frac{R+\rho_\delta}{2}.                                              \label{eq:anchor-scale}
+\end{align}
+The exact constants used by the formal theorem are the following elements
+of \(\Rbarp\):
+\begin{align}
+  m_-
+  &=
+  \iota\!\left(c_A\varepsilon_\delta^\alpha\right),                     \label{eq:mminus}\\
+  m_+
+  &=
+  \iota\!\left(C_A R^\alpha\right),                                    \label{eq:mplus}\\
+  K_\delta
+  &=
+  \iota\!\left(
+    \frac{r_\delta^{-p}-R^{-p}}{p}
+  \right)^{-1},                                                         \label{eq:tail-constant}\\
+  G_\delta
+  &=
+  \left(\frac{4m_+}{m_-}\right)K_\delta,                                \label{eq:global-constant}\\
+  D_\delta
+  &=
+  \left(
+    \iota(p)+\iota(R)^{-p}G_\delta
+  \right)\iota(C_A),                                                    \label{eq:reverse-constant}\\
+  c
+  &=
+  D_\delta^{-1},                                                        \label{eq:lower-constant}\\
+  C
+  &=
+  \iota(c_A)^{-1}\iota(p)^{-1}.                                        \label{eq:upper-constant}
+\end{align}
+Here \(\iota(R)^{-p}\) denotes the extended nonnegative real power.  Since
+all of the relevant real quantities are positive and finite, it agrees
+with \(\iota(R^{-p})\).
+
+\begin{theorem}[Exact-diameter equivalence]                               \label{thm:main}
+Fix \(d,\alpha,s,c_A,C_A\) as above, choose a structural \(\delta\)
+satisfying \eqref{eq:delta-radius}--\eqref{eq:delta-small}, and define
+\(c,C\) by \eqref{eq:rho}--\eqref{eq:upper-constant}.  Then
+\[
+  0<c<\infty,\qquad 0<C<\infty.
+\]
+For every Borel measure \(\nu\) on \(X\) and every globally Borel
+measurable \(u:X\to\mathbb R\), if \(\nu\) satisfies \((\mathrm{AR})\) and
+\(\supp\nu\subseteq\Cube\), then
+\begin{equation}
+  c\,\Benergy_{\alpha,s}(u)
+  \leq
+  \Aenergy_{s,R}(u)
+  \leq
+  C\,\Benergy_{\alpha,s}(u).                                             \label{eq:main-comparison}
+\end{equation}
+The constants are selected in the order
+\[
+  (d,\alpha,s,c_A,C_A)
+  \longmapsto
+  (\delta,c,C)
+  \longmapsto
+  (\nu,u).
+\]
+In particular, \(c\) and \(C\) do not depend on \(\nu\) or \(u\).
+\end{theorem}
+
+The remainder of the article proves Theorem~\ref{thm:main}.
+
+\section{Measure-theoretic preliminaries}
+
+\begin{lemma}[Automatic finiteness and sigma-finiteness]                  \label{lem:finite-measure}
+Under the hypotheses of Theorem~\ref{thm:main}, the measure \(\nu\) is
+finite.  Consequently it is sigma-finite.
+\end{lemma}
+
+\begin{proof}
+The support \(E=\supp\nu\) is closed and lies in the compact cube
+\(\Cube\), hence \(E\) is compact.  For every \(x\in E\), the upper
+Ahlfors estimate at radius \(R\) gives
+\[
+  \nu(B(x,R))
+  \leq C_A R^\alpha
+  <\infty.
+\]
+The balls \(B(x,R)\), \(x\in E\), form an open cover of \(E\).  Compactness
+gives a finite subcover, so finite subadditivity yields \(\nu(E)<\infty\).
+The complement of the support is \(\nu\)-null in the second-countable
+Euclidean space.  Therefore
+\[
+  \nu(X)=\nu(E)<\infty.
+\]
+A finite measure is sigma-finite.
+\end{proof}
+
+\begin{lemma}[Measurability of the energy kernels]                         \label{lem:measurability}
+If \(u:X\to\mathbb R\) is Borel measurable, then all integrands in
+\eqref{eq:ball-energy}--\eqref{eq:global-variation} are measurable.  The
+maps \(x\mapsto D_r(x)\), \(r\mapsto L_r\), and \(r\mapsto N_r\) are
+measurable wherever they are used.  All applications of Tonelli below are
+therefore valid.
+\end{lemma}
+
+\begin{proof}
+The map
+\[
+  (x,y)\longmapsto\Delta_u(x,y)
+\]
+is Borel measurable because subtraction and squaring are continuous.
+The distance map is continuous, and hence
+\[
+  \{(r,x,y)\in\mathbb R\times X\times X:\lvert x-y\rvert<r\}
+\]
+is Borel.  Thus
+\[
+  (r,x,y)
+  \longmapsto
+  \ind_{\{\lvert x-y\rvert<r\}}\Delta_u(x,y)
+\]
+is a nonnegative measurable function.  Parameterized Tonelli, using the
+sigma-finiteness from Lemma~\ref{lem:finite-measure}, shows that its
+integrals in \(y\), and subsequently in \(x\), are measurable functions of
+the remaining variables.  Applying the same argument to the indicator
+alone shows that \((r,x)\mapsto\nu(B(x,r))\) is measurable.  Extended
+inversion, multiplication, and real power are Borel operations on
+\(\Rbarp\).  This proves the assertions for \(D_r\), \(L_r\), \(N_r\), and
+the scale integrands.  The kernels in
+\eqref{eq:besov-energy}--\eqref{eq:global-variation} are measurable by the
+same closure properties, with the diagonal handled by a measurable
+piecewise definition.
+\end{proof}
+
+\begin{lemma}[Atomlessness]                                                \label{lem:atomless}
+Every singleton has zero \(\nu\)-measure.
+\end{lemma}
+
+\begin{proof}
+First let \(x\in E\).  For every \(0<r\leq R\),
+\[
+  \nu(\{x\})
+  \leq\nu(B(x,r))
+  \leq C_A r^\alpha.
+\]
+Since \(\alpha>0\), the right side tends to zero as \(r\downarrow0\), and
+therefore \(\nu(\{x\})=0\).  If \(x\notin E\), the definition of support
+provides an open neighborhood \(U\) of \(x\) with \(\nu(U)=0\), whence
+\(\nu(\{x\})=0\) as well.
+\end{proof}
+
+\begin{remark}
+Lemma~\ref{lem:atomless} is independently useful, but the formal definition
+of \(\Benergy_{\alpha,s}\) does not rely on it: the diagonal integrand is
+set to zero explicitly.
+\end{remark}
+
+\section{Normalization by Ahlfors regularity}
+
+\begin{lemma}[Fixed-scale normalization]                                  \label{lem:fixed-normalization}
+For \(0<r\leq R\),
+\[
+  (C_A r^\alpha)^{-1}L_r
+  \leq N_r
+  \leq(c_A r^\alpha)^{-1}L_r.
+\]
+\end{lemma}
+
+\begin{proof}
+The support is conull.  Thus for almost every \(x\), \(x\in E\), and
+\((\mathrm{AR})\) gives
+\[
+  c_A r^\alpha
+  \leq\nu(B(x,r))
+  \leq C_A r^\alpha.
+\]
+All three quantities are positive and finite.  Extended inversion reverses
+the inequalities, so
+\[
+  (C_A r^\alpha)^{-1}
+  \leq\nu(B(x,r))^{-1}
+  \leq(c_A r^\alpha)^{-1}.
+\]
+Multiplication by \(D_r(x)\in\Rbarp\) preserves the order.  Integration in
+\(x\) proves the result.
+\end{proof}
+
+\begin{lemma}[Integrated normalization]                                   \label{lem:integrated-normalization}
+One has
+\begin{equation}
+  C_A^{-1}\Senergy_{\alpha,s,R}(u)
+  \leq
+  \Aenergy_{s,R}(u)
+  \leq
+  c_A^{-1}\Senergy_{\alpha,s,R}(u).                                      \label{eq:normalization-comparison}
+\end{equation}
+In particular,
+\begin{equation}
+  \Senergy_{\alpha,s,R}(u)
+  \leq
+  C_A\Aenergy_{s,R}(u).                                                   \label{eq:scale-by-averaged}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+For \(A>0\) and \(r>0\),
+\[
+  r^{-1-2s}(A r^\alpha)^{-1}
+  =
+  A^{-1}r^{-1-\alpha-2s}.
+\]
+Multiply the inequalities of Lemma~\ref{lem:fixed-normalization} by
+\(r^{-1-2s}\), integrate over \((0,R]\), and use
+\eqref{eq:averaged-energy}--\eqref{eq:scale-energy}.  This gives
+\eqref{eq:normalization-comparison}.  Since \(C_A\) is positive and finite,
+multiplication by \(C_A\) and cancellation of \(C_A C_A^{-1}=1\) yield
+\eqref{eq:scale-by-averaged}.  The cancellation is valid in \(\Rbarp\)
+because the cancelled factor is neither zero nor infinity.
+\end{proof}
+
+\section{The scale integral and its exact Tonelli kernel}
+
+Define
+\begin{equation}
+  K_{p,R}(t)
+  =
+  \begin{cases}
+    \dfrac{t^{-p}-R^{-p}}{p},&0<t\leq R,\\[2mm]
+    0,&\text{otherwise}.
+  \end{cases}                                                            \label{eq:truncated-kernel}
+\end{equation}
+The associated truncated double energy is
+\begin{equation}
+  \Tenergy_{p,R}(u)
+  =
+  \int_X\int_X
+  K_{p,R}(\lvert x-y\rvert)\Delta_u(x,y)
+  \,\dd\nu(y)\,\dd\nu(x).                                                \label{eq:truncated-energy}
+\end{equation}
+
+\begin{lemma}[Scalar scale integral]                                      \label{lem:scalar-scale}
+If \(p>0\) and \(0<t\leq R\), then
+\[
+  \int_{(t,R]}r^{-1-p}\,\dd r
+  =
+  \frac{t^{-p}-R^{-p}}{p}.
+\]
+\end{lemma}
+
+\begin{proof}
+The function \(-p^{-1}r^{-p}\) is an antiderivative of
+\(r^{-1-p}\) on \((0,\infty)\).  Evaluation at \(t\) and \(R\) gives the
+formula.  The integrand is integrable on \((t,R]\) because the interval is
+bounded away from zero.
+\end{proof}
+
+\begin{lemma}[Exact Tonelli identity]                                     \label{lem:tonelli}
+For every measurable \(u:X\to\mathbb R\),
+\begin{equation}
+  \Senergy_{\alpha,s,R}(u)
+  =
+  \Tenergy_{p,R}(u).                                                       \label{eq:tonelli-identity}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Expand \(L_r\) from \eqref{eq:local-energy} and
+\eqref{eq:ball-energy}:
+\[
+  \Senergy_{\alpha,s,R}(u)
+  =
+  \int_{(0,R]}\int_X\int_X
+  \ind_{\{\lvert x-y\rvert<r\}}
+  r^{-1-p}\Delta_u(x,y)
+  \,\dd\nu(y)\,\dd\nu(x)\,\dd r.
+\]
+The integrand is nonnegative and measurable by
+Lemma~\ref{lem:measurability}, so Tonelli permits both changes of order.
+Fix \(x,y\), and put \(t=\lvert x-y\rvert\).
+
+If \(x\neq y\), then \(t>0\).  For \(0<t\leq R\), the allowed scales are
+exactly \((t,R]\), and Lemma~\ref{lem:scalar-scale} gives
+\[
+  \int_{(0,R]}
+  \ind_{\{t<r\}}r^{-1-p}\,\dd r
+  =
+  K_{p,R}(t).
+\]
+If \(t>R\), there is no allowed scale and both sides are zero.  If \(t=R\),
+there is likewise no \(r\in(0,R]\) with \(t<r\); this is precisely why
+\(K_{p,R}(R)=0\).
+
+If \(x=y\), then \(\Delta_u(x,x)=0\), so the complete scale integrand is
+identically zero.  We handle this case before factoring the scalar
+integral: the unmultiplied integral of \(r^{-1-p}\) down to zero diverges,
+and no informal infinity-times-zero calculation is used.
+
+After integration in \(x\) and \(y\), the resulting expression is exactly
+\eqref{eq:truncated-energy}.
+\end{proof}
+
+\section{Comparison with the full singular kernel}
+
+\begin{lemma}[Pointwise kernel decomposition]                              \label{lem:kernel-decomposition}
+For \(t>0\),
+\begin{equation}
+  t^{-p}
+  \leq
+  pK_{p,R}(t)+R^{-p}.                                                      \label{eq:kernel-upper}
+\end{equation}
+Equality holds whenever \(0<t\leq R\).
+\end{lemma}
+
+\begin{proof}
+If \(0<t\leq R\), the definition gives
+\[
+  pK_{p,R}(t)+R^{-p}
+  =
+  t^{-p}-R^{-p}+R^{-p}
+  =
+  t^{-p}.
+\]
+If \(t>R\), then \(K_{p,R}(t)=0\).  Since \(p>0\), the function
+\(t\mapsto t^{-p}\) is decreasing on \((0,\infty)\), and hence
+\(t^{-p}\leq R^{-p}\).
+\end{proof}
+
+\begin{lemma}[Full-energy decomposition]                                  \label{lem:full-decomposition}
+One has
+\begin{equation}
+  \Benergy_{\alpha,s}(u)
+  \leq
+  p\Tenergy_{p,R}(u)
+  +
+  R^{-p}\Venergy(u).                                                       \label{eq:full-decomposition}
+\end{equation}
+Moreover, equality holds if
+\(\lvert x-y\rvert\leq R\) for \(\nu\otimes\nu\)-almost every pair
+\((x,y)\).  In particular, equality holds under the cube-support
+hypothesis.
+\end{lemma}
+
+\begin{proof}
+On the diagonal, both \(\Phi_{p,u}(x,x)\) and
+\(\Delta_u(x,x)\) are zero.  Off the diagonal, multiply
+\eqref{eq:kernel-upper} by \(\Delta_u(x,y)\), and integrate twice.  Tonelli
+and distributivity for nonnegative extended integrals give
+\eqref{eq:full-decomposition}.
+
+If almost every pair has distance at most \(R\), then the equality case of
+Lemma~\ref{lem:kernel-decomposition} applies almost everywhere.  If
+\(E\subseteq\Cube\), then
+\[
+  \lvert x-y\rvert^2
+  =
+  \sum_{j=1}^d(x_j-y_j)^2
+  \leq d
+\]
+for \(x,y\in E\).  Since \(E\) is conull, this proves the final assertion.
+Pairs at exact distance \(R\) are included: their truncated-kernel
+contribution is zero, while their contribution appears in the
+\(R^{-p}\Venergy(u)\) term.
+\end{proof}
+
+\begin{lemma}[Truncated energy is bounded by full energy]                  \label{lem:truncated-by-full}
+One has
+\begin{equation}
+  \Tenergy_{p,R}(u)
+  \leq
+  p^{-1}\Benergy_{\alpha,s}(u).                                          \label{eq:truncated-by-full}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+For \(0<t\leq R\),
+\[
+  K_{p,R}(t)
+  =
+  \frac{t^{-p}-R^{-p}}p
+  \leq
+  p^{-1}t^{-p}.
+\]
+For \(t>R\), the left side is zero.  On the diagonal, the complete
+integrands are both defined to be zero.  Multiplication by
+\(\Delta_u(x,y)\) and two applications of monotonicity of the nonnegative
+integral prove \eqref{eq:truncated-by-full}.
+\end{proof}
+
+\begin{corollary}[The easy comparison]                                    \label{cor:easy}
+\[
+  \Aenergy_{s,R}(u)
+  \leq
+  c_A^{-1}p^{-1}\Benergy_{\alpha,s}(u).
+\]
+\end{corollary}
+
+\begin{proof}
+By Lemmas~\ref{lem:integrated-normalization},
+\ref{lem:tonelli}, and \ref{lem:truncated-by-full},
+\[
+  \Aenergy_{s,R}(u)
+  \leq
+  c_A^{-1}\Senergy_{\alpha,s,R}(u)
+  =
+  c_A^{-1}\Tenergy_{p,R}(u)
+  \leq
+  c_A^{-1}p^{-1}\Benergy_{\alpha,s}(u).
+\]
+\end{proof}
+
+\section{A structural point away from every corner}
+
+\begin{lemma}[Existence of the structural corner scale]                   \label{lem:corner-scale}
+A number \(\delta>0\) satisfying
+\eqref{eq:delta-radius}--\eqref{eq:delta-small} exists and depends only on
+\(d,\alpha,c_A,C_A\).
+\end{lemma}
+
+\begin{proof}
+Since \(\alpha>0\),
+\[
+  (2\delta)^\alpha\longrightarrow0
+  \qquad(\delta\downarrow0).
+\]
+There are \(2^d\) corners, so
+\[
+  \sum_{v\in\Corners}C_A(2\delta)^\alpha
+  =
+  2^d C_A(2\delta)^\alpha
+  \longrightarrow0.
+\]
+The target \(c_A R^\alpha\) is strictly positive.  Thus
+\eqref{eq:delta-small} holds for all sufficiently small positive
+\(\delta\).  Shrinking \(\delta\) further ensures \(2\delta\leq R\).
+\end{proof}
+
+\begin{lemma}[Corner-neighborhood estimate]                               \label{lem:corner-neighborhood}
+For every corner \(v\in\Corners\),
+\begin{equation}
+  \nu(B(v,\delta))
+  \leq
+  C_A(2\delta)^\alpha.                                                     \label{eq:one-corner}
+\end{equation}
+Consequently, for
+\[
+  \mathcal N_\delta
+  =
+  \bigcup_{v\in\Corners}B(v,\delta),
+\]
+one has
+\begin{equation}
+  \nu(\mathcal N_\delta)
+  \leq
+  \sum_{v\in\Corners}C_A(2\delta)^\alpha
+  <
+  c_A R^\alpha.                                                           \label{eq:all-corners}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Fix \(v\).  If \(\nu(B(v,\delta))=0\), then
+\eqref{eq:one-corner} is immediate.  Otherwise the ball meets the support:
+choose \(y_v\in B(v,\delta)\cap E\).  Indeed, the complement of \(E\) is
+null, so a positive-measure Borel set cannot be contained in it.  If
+\(z\in B(v,\delta)\), then
+\[
+  \lvert z-y_v\rvert
+  \leq
+  \lvert z-v\rvert+\lvert v-y_v\rvert
+  <
+  2\delta.
+\]
+Thus
+\[
+  B(v,\delta)\subseteq B(y_v,2\delta).
+\]
+Since \(y_v\in E\), \(2\delta>0\), and \(2\delta\leq R\), the upper
+Ahlfors estimate gives
+\[
+  \nu(B(v,\delta))
+  \leq
+  \nu(B(y_v,2\delta))
+  \leq
+  C_A(2\delta)^\alpha.
+\]
+Finite subadditivity over the \(2^d\) corners, followed by
+\eqref{eq:delta-small}, proves \eqref{eq:all-corners}.
+\end{proof}
+
+\begin{lemma}[Supported point uniformly away from the corners]            \label{lem:away-point}
+Assume \(\nu\neq0\).  Then there exists \(q\in E\) such that
+\begin{equation}
+  \delta\leq\lvert q-v\rvert
+  \qquad(v\in\Corners).                                                    \label{eq:away-corners}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Since \(\nu\neq0\), the support is nonempty; choose \(x_0\in E\).  The
+lower Ahlfors estimate at radius \(R\) gives
+\begin{equation}
+  c_A R^\alpha
+  \leq
+  \nu(B(x_0,R))
+  \leq
+  \nu(X).                                                                 \label{eq:mass-lower}
+\end{equation}
+If every supported point belonged to \(\mathcal N_\delta\), then conullity
+of \(E\) would imply
+\[
+  \nu(X)=\nu(E)\leq\nu(\mathcal N_\delta).
+\]
+This contradicts \eqref{eq:all-corners} and
+\eqref{eq:mass-lower}.  Hence some
+\[
+  q\in E\setminus\mathcal N_\delta
+\]
+exists.  Not belonging to the open ball \(B(v,\delta)\) is exactly
+\(\lvert q-v\rvert\geq\delta\), proving
+\eqref{eq:away-corners}.
+\end{proof}
+
+\section{Subdiametral geometry and the anchor set}
+
+\begin{lemma}[Quantitative subdiametral radius]                            \label{lem:subdiametral}
+Let \(q\in\Cube\) satisfy \eqref{eq:away-corners}.  Then
+\[
+  0\leq\rho_\delta<R
+\]
+and
+\begin{equation}
+  \lvert x-q\rvert
+  \leq
+  \rho_\delta
+  \qquad(x\in\Cube).                                                       \label{eq:cube-in-subdiameter}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Define a corner \(a\in\Corners\) coordinatewise by
+\[
+  a_j
+  =
+  \begin{cases}
+    1,&q_j>\frac12,\\
+    0,&q_j\leq\frac12.
+  \end{cases}
+\]
+For every \(x\in\Cube\) and every coordinate \(j\),
+\begin{equation}
+  \lvert q_j-a_j\rvert^2
+  +
+  \lvert x_j-q_j\rvert^2
+  \leq1.                                                                  \label{eq:coordinate-complement}
+\end{equation}
+Indeed, if \(q_j>1/2\), then \(a_j=1\) and
+\[
+  \lvert x_j-q_j\rvert\leq q_j,
+  \qquad
+  (1-q_j)^2+q_j^2\leq1.
+\]
+If \(q_j\leq1/2\), then \(a_j=0\) and
+\[
+  \lvert x_j-q_j\rvert\leq1-q_j,
+  \qquad
+  q_j^2+(1-q_j)^2\leq1.
+\]
+Summing \eqref{eq:coordinate-complement} gives
+\[
+  \lvert q-a\rvert^2+\lvert x-q\rvert^2\leq d.
+\]
+By \eqref{eq:away-corners}, \(\delta\leq\lvert q-a\rvert\), and therefore
+\[
+  \lvert x-q\rvert^2
+  \leq
+  d-\lvert q-a\rvert^2
+  \leq
+  d-\delta^2.
+\]
+This proves \eqref{eq:cube-in-subdiameter}.  It also shows
+\(d-\delta^2\geq0\).  Since \(\delta>0\),
+\[
+  d-\delta^2<d,
+\]
+and monotonicity of the square root gives
+\[
+  \rho_\delta=\sqrt{d-\delta^2}<\sqrt d=R.
+\]
+\end{proof}
+
+\begin{lemma}[Positive-measure anchor set below the diameter]             \label{lem:anchor-set}
+Assume \(\nu\neq0\), and choose \(q\) as in
+Lemma~\ref{lem:away-point}.  Let
+\[
+  S=B(q,\varepsilon_\delta)\cap E.
+\]
+Then \(S\) is measurable, \(S\subseteq E\), and
+\begin{equation}
+  m_-
+  \leq
+  \nu(S),                                                                 \label{eq:anchor-mass-lower}
+\end{equation}
+so in particular \(\nu(S)>0\).  Moreover,
+\begin{equation}
+  \lvert x-z\rvert<r_\delta
+  \qquad(x\in E,\ z\in S),                                                \label{eq:anchor-distance}
+\end{equation}
+where
+\[
+  0<r_\delta<R.
+\]
+\end{lemma}
+
+\begin{proof}
+By Lemma~\ref{lem:subdiametral},
+\[
+  0\leq\rho_\delta<R.
+\]
+Hence
+\[
+  \varepsilon_\delta=\frac{R-\rho_\delta}{2}>0,
+  \qquad
+  r_\delta=\frac{R+\rho_\delta}{2}<R.
+\]
+Also \(\varepsilon_\delta\leq R\).  The open ball is Borel, the support is
+closed, and therefore \(S\) is measurable.  Since \(E\) is conull,
+\[
+  \nu(S)=\nu(B(q,\varepsilon_\delta)).
+\]
+The point \(q\) belongs to \(E\), so the lower Ahlfors estimate gives
+\[
+  \nu(S)
+  \geq
+  c_A\varepsilon_\delta^\alpha
+  =
+  m_-.
+\]
+This quantity is strictly positive.
+
+For \(x\in E\subseteq\Cube\) and \(z\in S\), use
+Lemma~\ref{lem:subdiametral} and the strict ball membership of \(z\):
+\[
+  \lvert x-z\rvert
+  \leq
+  \lvert x-q\rvert+\lvert q-z\rvert
+  <
+  \rho_\delta+\varepsilon_\delta
+  =
+  \frac{R+\rho_\delta}{2}
+  =
+  r_\delta.
+\]
+This proves \eqref{eq:anchor-distance}.
+\end{proof}
+
+\begin{lemma}[Total-mass upper bound]                                      \label{lem:total-mass-upper}
+Under the assumptions of Lemma~\ref{lem:anchor-set},
+\begin{equation}
+  \nu(X)\leq m_+.                                                          \label{eq:total-mass-upper}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Because \(\nu(S)>0\), the set \(S\) is nonempty; choose \(z\in S\).  Then
+\(z\in E\).  By \eqref{eq:anchor-distance} and \(r_\delta<R\),
+\[
+  E\subseteq B(z,R).
+\]
+This containment is strict at the metric level: every supported point has
+distance less than \(r_\delta\), not merely at most \(R\).  Since \(E\) is
+conull,
+\[
+  \nu(X)
+  \leq
+  \nu(B(z,R))
+  \leq
+  C_A R^\alpha
+  =
+  m_+,
+\]
+where the second inequality is the upper Ahlfors estimate at \(z\) and
+radius \(R\).
+\end{proof}
+
+\begin{remark}[Why the corner construction is needed]
+It is false in general that an open ball \(B(x,R)\), with
+\(R=\sqrt d\), contains the whole cube: opposite corners are exactly
+distance \(R\) apart.  Lemma~\ref{lem:anchor-set} replaces this invalid
+endpoint argument by a structural scale \(r_\delta<R\).  The strict gap
+simultaneously supplies an open-ball covering in
+Lemma~\ref{lem:total-mass-upper} and a positive terminal interval of scales
+below.
+\end{remark}
+
+\section{The anchor estimate for global variation}
+
+\begin{lemma}[Three-point squared-difference inequality]                  \label{lem:three-point}
+For all \(x,y,z\in X\),
+\begin{equation}
+  \Delta_u(x,y)
+  \leq
+  2\Delta_u(x,z)+2\Delta_u(z,y).                                         \label{eq:three-point}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Write
+\[
+  u(x)-u(y)
+  =
+  (u(x)-u(z))+(u(z)-u(y)).
+\]
+The elementary inequality \((a+b)^2\leq2a^2+2b^2\) gives
+\eqref{eq:three-point}.
+\end{proof}
+
+\begin{lemma}[Anchor control of global variation]                          \label{lem:anchor-variation}
+Assume \(\nu\neq0\), and let \(S\) be the anchor set of
+Lemma~\ref{lem:anchor-set}.  Then
+\begin{equation}
+  \Venergy(u)
+  \leq
+  \frac{4m_+}{m_-}\,L_{r_\delta}.                                        \label{eq:variation-by-local}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Define
+\[
+  H(x)
+  =
+  \int_S\Delta_u(x,z)\,\dd\nu(z).
+\]
+Integrate \eqref{eq:three-point} over \(z\in S\).  Symmetry of
+\(\Delta_u\) gives
+\begin{equation}
+  \nu(S)\Delta_u(x,y)
+  \leq
+  2H(x)+2H(y).                                                            \label{eq:point-anchor}
+\end{equation}
+Integrating in \(x\) and \(y\) and using Tonelli yields
+\begin{align*}
+  \nu(S)\Venergy(u)
+  &\leq
+  2\nu(X)\int_XH(x)\,\dd\nu(x)
+  +
+  2\nu(X)\int_XH(y)\,\dd\nu(y)\\
+  &=
+  4\nu(X)\int_XH(x)\,\dd\nu(x).
+\end{align*}
+For almost every \(x\), one has \(x\in E\).  By
+\eqref{eq:anchor-distance}, \(S\subseteq B(x,r_\delta)\), and hence
+\[
+  H(x)
+  \leq
+  \int_{B(x,r_\delta)}\Delta_u(x,z)\,\dd\nu(z)
+  =
+  D_{r_\delta}(x).
+\]
+It follows that
+\begin{equation}
+  \nu(S)\Venergy(u)
+  \leq
+  4\nu(X)L_{r_\delta}.                                                     \label{eq:uncancelled-anchor}
+\end{equation}
+By \eqref{eq:anchor-mass-lower} and
+\eqref{eq:total-mass-upper},
+\[
+  0<m_-\leq\nu(S)\leq\nu(X)\leq m_+<\infty.
+\]
+Thus division by \(\nu(S)\) is legitimate in \(\Rbarp\), and
+\[
+  \Venergy(u)
+  \leq
+  \frac{4\nu(X)}{\nu(S)}L_{r_\delta}
+  \leq
+  \frac{4m_+}{m_-}L_{r_\delta}.
+\]
+\end{proof}
+
+\section{Recovering one local scale from the scale integral}
+
+\begin{lemma}[Monotonicity of local energy]                               \label{lem:local-monotone}
+The map \(r\mapsto L_r\) is nondecreasing.
+\end{lemma}
+
+\begin{proof}
+If \(r\leq t\), then \(B(x,r)\subseteq B(x,t)\) for every \(x\).  Since
+\(\Delta_u\geq0\),
+\[
+  D_r(x)\leq D_t(x).
+\]
+Integration in \(x\) gives \(L_r\leq L_t\).
+\end{proof}
+
+\begin{lemma}[Terminal scale interval]                                    \label{lem:terminal-scale}
+Under the assumptions of Lemma~\ref{lem:anchor-set},
+\begin{equation}
+  L_{r_\delta}
+  \leq
+  K_\delta\Senergy_{\alpha,s,R}(u).                                      \label{eq:local-by-scale}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Because \(0<r_\delta<R\) and \(p>0\),
+\begin{equation}
+  k_\delta
+  :=
+  \int_{(r_\delta,R]}r^{-1-p}\,\dd r
+  =
+  \frac{r_\delta^{-p}-R^{-p}}p
+  >0.                                                                    \label{eq:tail-mass}
+\end{equation}
+For \(r\in(r_\delta,R]\), Lemma~\ref{lem:local-monotone} gives
+\(L_{r_\delta}\leq L_r\).  Therefore
+\[
+  k_\delta L_{r_\delta}
+  \leq
+  \int_{(r_\delta,R]}r^{-1-p}L_r\,\dd r
+  \leq
+  \Senergy_{\alpha,s,R}(u).
+\]
+The number \(k_\delta\) is positive and finite, so extended cancellation
+gives
+\[
+  L_{r_\delta}
+  \leq
+  k_\delta^{-1}\Senergy_{\alpha,s,R}(u)
+  =
+  K_\delta\Senergy_{\alpha,s,R}(u).
+\]
+\end{proof}
+
+\begin{corollary}[Structural control of global variation]                 \label{cor:global-by-scale}
+If \(\nu\neq0\), then
+\begin{equation}
+  \Venergy(u)
+  \leq
+  G_\delta\Senergy_{\alpha,s,R}(u)
+  =
+  G_\delta\Tenergy_{p,R}(u).                                              \label{eq:global-by-truncated}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Combine Lemmas~\ref{lem:anchor-variation} and
+\ref{lem:terminal-scale}:
+\[
+  \Venergy(u)
+  \leq
+  \frac{4m_+}{m_-}L_{r_\delta}
+  \leq
+  \frac{4m_+}{m_-}K_\delta
+  \Senergy_{\alpha,s,R}(u).
+\]
+The coefficient is \(G_\delta\) by
+\eqref{eq:global-constant}, and
+Lemma~\ref{lem:tonelli} gives the final equality.
+\end{proof}
+
+\section{Proof of the main theorem}
+
+\begin{lemma}[Positivity and finiteness of the constants]                 \label{lem:constant-positivity}
+The constants in \eqref{eq:mminus}--\eqref{eq:upper-constant} satisfy
+\[
+  0<c<\infty,\qquad0<C<\infty.
+\]
+\end{lemma}
+
+\begin{proof}
+From \(d>0\), \(R=\sqrt d>0\).  From
+\eqref{eq:delta-radius}, \(\delta\leq R/2<R\), and hence
+\[
+  0\leq\rho_\delta=\sqrt{d-\delta^2}<R.
+\]
+Therefore
+\[
+  \varepsilon_\delta>0,
+  \qquad
+  0<r_\delta<R.
+\]
+Since \(\alpha,c_A,C_A,R,\varepsilon_\delta\) are positive,
+\[
+  0<m_-<\infty,\qquad0<m_+<\infty.
+\]
+Because \(p>0\) and \(r_\delta<R\), the negative power is strictly
+decreasing:
+\[
+  r_\delta^{-p}>R^{-p}.
+\]
+Thus the real number in parentheses in \eqref{eq:tail-constant} is
+positive and finite, and consequently
+\[
+  0<K_\delta<\infty.
+\]
+It follows successively from
+\eqref{eq:global-constant} and \eqref{eq:reverse-constant} that
+\[
+  0<G_\delta<\infty,
+  \qquad
+  0<D_\delta<\infty.
+\]
+The inverse of a positive finite extended nonnegative real is again positive
+and finite, proving the claim for \(c=D_\delta^{-1}\).  The same argument
+applied to \(c_A\) and \(p\) proves the claim for
+\(C=c_A^{-1}p^{-1}\).
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+The constants \(\delta,c,C\) have already been selected solely from the
+structural data
+\[
+  d,\quad\alpha,\quad s,\quad c_A,\quad C_A.
+\]
+Lemma~\ref{lem:constant-positivity} proves their positivity and finiteness.
+Now fix an arbitrary qualifying measure \(\nu\) and measurable function
+\(u\).
+
+The upper inequality follows for every \(\nu\), including the zero measure,
+from Corollary~\ref{cor:easy}:
+\[
+  \Aenergy_{s,R}(u)
+  \leq
+  c_A^{-1}p^{-1}\Benergy_{\alpha,s}(u)
+  =
+  C\Benergy_{\alpha,s}(u).
+\]
+
+For the reverse inequality, first suppose \(\nu=0\).  Then every ball
+energy, local energy, scale energy, truncated energy, global variation, and
+singular energy is zero.  In the normalized local energy,
+\(\nu(B(x,r))^{-1}=\infty\) and \(D_r(x)=0\); the stipulated
+\(\Rbarp\) convention gives \(\infty\cdot0=0\).  Thus
+\(\Aenergy_{s,R}(u)=0\), and the reverse inequality is \(0\leq0\).
+
+Suppose now that \(\nu\neq0\).  Corollary~\ref{cor:global-by-scale} and the
+full-energy decomposition give
+\begin{align*}
+  \Benergy_{\alpha,s}(u)
+  &\leq
+  p\Tenergy_{p,R}(u)
+  +
+  R^{-p}\Venergy(u)\\
+  &\leq
+  \left(p+R^{-p}G_\delta\right)
+  \Tenergy_{p,R}(u).
+\end{align*}
+Using the Tonelli identity and the lower side of the normalization
+comparison in its rearranged form \eqref{eq:scale-by-averaged},
+\begin{align*}
+  \Benergy_{\alpha,s}(u)
+  &\leq
+  \left(p+R^{-p}G_\delta\right)
+  \Senergy_{\alpha,s,R}(u)\\
+  &\leq
+  \left(p+R^{-p}G_\delta\right)
+  C_A\Aenergy_{s,R}(u)\\
+  &=
+  D_\delta\Aenergy_{s,R}(u).
+\end{align*}
+The coefficient \(D_\delta\) is positive and finite.  Hence extended
+cancellation is valid, and
+\[
+  D_\delta^{-1}\Benergy_{\alpha,s}(u)
+  \leq
+  \Aenergy_{s,R}(u).
+\]
+Since \(c=D_\delta^{-1}\), this is the required reverse inequality.
+\end{proof}
+
+\begin{remark}[The unused exponent restriction]
+The proof uses only \(p=\alpha+2s>0\), which follows from
+\(\alpha>0\) and \(s>0\).  The restriction \(s<\alpha/2\) remains in
+Theorem~\ref{thm:main} to match the formal target, but it is not needed for
+the comparison proved here.
+\end{remark}
+
+\section{Endpoint and extended-valued safeguards}
+
+For clarity, the proof uses the following safeguards explicitly.
+
+\begin{enumerate}
+  \item The scale domain is \((0,R]\), while the metric balls are open.
+  Thus a pair at distance \(R\) is in no ball at an allowed scale.
+  Accordingly \(K_{p,R}(R)=0\).
+
+  \item The missing contribution at distance \(R\) is not discarded.  It
+  appears exactly in the \(R^{-p}\Venergy(u)\) term of the full-energy
+  decomposition.
+
+  \item The diagonal is handled before the scalar scale integral is
+  factored.  The scalar integral
+  \[
+    \int_0^R r^{-1-p}\,\dd r=\infty
+  \]
+  diverges, but the complete diagonal integrand is identically zero because
+  \(\Delta_u(x,x)=0\).
+
+  \item The cube diameter estimate gives only
+  \(\lvert x-y\rvert\leq R\).  It does not imply that an open
+  \(R\)-ball centered at an arbitrary cube point contains the cube.
+  The corner-avoidance construction produces the strict anchor scale
+  \(r_\delta<R\).
+
+  \item The zero measure satisfies the formal Ahlfors predicate vacuously,
+  because its support is empty.  It is therefore a genuine case of the
+  theorem and is treated separately.
+
+  \item No subtraction of extended energies is used.  The only subtraction
+  occurs between finite positive real powers in
+  \(K_{p,R}\) and \(k_\delta\), before embedding into \(\Rbarp\).
+
+  \item Every cancellation or division in \(\Rbarp\) is made only after
+  the relevant coefficient has been proved positive and finite.
+\end{enumerate}
+
+\appendix
+
+\section{Correspondence with the Lean 4 formalization}
+
+The compiled final declaration is
+\[
+  \texttt{BesovVerification.}
+  \texttt{exists\_exactCube\_besovEnergy\_equivalence\_constants}.
+\]
+Its quantifier order is:
+\[
+  \forall d,\alpha,s,c_A,C_A,\quad
+  \exists c,C,\quad
+  \forall\nu,u.
+\]
+It assumes
+\[
+  d>0,\quad
+  \alpha>0,\quad
+  s>0,\quad
+  s<\alpha/2,\quad
+  c_A>0,\quad
+  c_A\leq C_A,
+\]
+and concludes the two inequalities in
+\eqref{eq:main-comparison}, with \(0<c,C<\infty\).
+
+\begin{center}
+\small
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{0.39\textwidth}
+  >{\raggedright\arraybackslash}p{0.53\textwidth}@{}}
+\toprule
+Lean source file & Mathematical role in this article\\
+\midrule
+\texttt{Definitions.lean}
+&
+Ambient Euclidean space, unit cube, Ahlfors predicate, ball, local,
+normalized, averaged, singular, and global energies.\\
+
+\texttt{Measurability.lean}
+&
+Parameterized measurability for moving balls, ball measures, local
+energies, and normalized scale integrands; supports
+Lemma~\ref{lem:measurability}.\\
+
+\texttt{Ahlfors.lean}
+&
+Atomlessness from the upper Ahlfors estimate; corresponds to
+Lemma~\ref{lem:atomless}.\\
+
+\texttt{CoreLemmas.lean}
+&
+The three-point squared-difference inequality and monotonicity of local
+energy; Lemmas~\ref{lem:three-point} and \ref{lem:local-monotone}.\\
+
+\texttt{ScaleIntegral.lean}
+&
+The real and extended-nonnegative scalar integral in
+Lemma~\ref{lem:scalar-scale}.\\
+
+\texttt{Normalization.lean}
+&
+Fixed-scale and integrated Ahlfors normalization;
+Lemmas~\ref{lem:fixed-normalization} and
+\ref{lem:integrated-normalization}.\\
+
+\texttt{EnergyIdentity.lean}
+&
+Measurable triple kernel, diagonal handling, Tonelli swaps, and the exact
+identity \eqref{eq:tonelli-identity}.\\
+
+\texttt{MainTheorem.lean}
+&
+Comparison of the truncated kernel with the singular kernel and the easy
+upper inequality; Lemma~\ref{lem:truncated-by-full} and
+Corollary~\ref{cor:easy}.\\
+
+\texttt{FullEnergyDecomposition.lean}
+&
+The pointwise singular-kernel identity and the global-variation tail;
+Lemmas~\ref{lem:kernel-decomposition} and
+\ref{lem:full-decomposition}.\\
+
+\texttt{CubeAnchor.lean}
+&
+Corner neighborhoods, structural corner-scale existence, compact-support
+finiteness, corner avoidance, subdiametral geometry, and quantitative
+anchor balls; the compact-support, corner-avoidance, and anchor-geometry
+arguments above.\\
+
+\texttt{FixedCornerScaleAnchor.lean}
+&
+Packages the anchor construction with \(\delta\) fixed before the measure,
+which is essential for the final quantifier order.\\
+
+\texttt{AnchorEstimate.lean}
+&
+Integration of the three-point inequality over the anchor set;
+Lemma~\ref{lem:anchor-variation}.\\
+
+\texttt{StructuralAnchorEstimate.lean}
+&
+Replaces the actual anchor and total masses by the uniform bounds
+\(m_-\) and \(m_+\).\\
+
+\texttt{TailEstimate.lean}
+&
+Recovers \(L_{r_\delta}\) from the terminal scale interval;
+Lemma~\ref{lem:terminal-scale}.\\
+
+\texttt{AnchorTailComparison.lean}
+&
+Composes anchor, terminal-scale, and normalization estimates.\\
+
+\texttt{ExactCubeConstants.lean}
+&
+Defines \(\rho_\delta,\varepsilon_\delta,\lambda_\delta,r_\delta\) and the
+exact constants \eqref{eq:mminus}--\eqref{eq:upper-constant}, and proves
+their positivity and finiteness.\\
+
+\texttt{ExactCubeMainTheorem.lean}
+&
+Handles the zero measure, assembles both inequalities, and establishes the
+final structural quantifier order.\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Pinned verification environment}
+
+The formal development was compiled in the following pinned environment:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Component & Version\\
+\midrule
+Lean & \(4.32.1\)\\
+Lean commit & \texttt{f054605aea4b840552cca2e725580bffd1e1b704}\\
+Lake & \(5.0.0\)\\
+Elan & \(4.2.3\)\\
+Toolchain & \texttt{leanprover/lean4:v4.32.1}\\
+Mathlib commit & \texttt{520045ab14e26149ee970e2e617ca04b09bde5d6}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The final theorem's reported logical dependencies are
+\[
+  \texttt{propext},\qquad
+  \texttt{Classical.choice},\qquad
+  \texttt{Quot.sound}.
+\]
+These are standard Lean axioms used by Mathlib.  The checked project source
+contains no unfinished proof term and introduces no custom axiom asserting
+the mathematical result.
+
+\end{document}

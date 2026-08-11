@@ -48,6 +48,11 @@ def run(
 
 
 def workspace_root() -> Path:
+    """Use an explicit workspace setting before historical default paths."""
+    configured = os.environ.get("BLG_ROOT")
+    if configured:
+        return Path(configured).expanduser().resolve()
+
     """Prefer the canonical spelling while supporting an older ~/blg clone."""
     canonical = HOME / "BLG"
     legacy = HOME / "blg"
